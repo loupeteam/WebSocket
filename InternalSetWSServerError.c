@@ -1,0 +1,110 @@
+/********************************************************************
+ * COPYRIGHT --  
+ ********************************************************************
+ * Library: OMJSON
+ * File: jsonInternalSetServerError.c
+ * Author: davidblackburn
+ * Created: September 22, 2014
+ ********************************************************************
+ * Implementation of library OMJSON
+ ********************************************************************/
+
+#include <bur/plctypes.h>
+#ifdef __cplusplus
+	extern "C"
+	{
+#endif
+
+#include "WebSocket.h"
+#include <string.h>
+#include <ctype.h> // For isspace
+#include "internal.h"
+	
+#ifdef __cplusplus
+	};
+#endif
+
+static struct tgProtect protect = {0};
+
+/************************************************************************/
+/* Internal: Set error status on a jsonWebSocketServer FUB instance 	*/
+/************************************************************************/
+
+char *skip(char *in) {while (in && isspace(*in)) in++; return in;}
+
+unsigned short internalSetWSConnectionError(struct WebSocketConnection_typ* t, signed long errorID, char* errorString)
+{
+
+	if( t == 0 ) return WS_ERR_INVALID_INPUT;
+	
+	t->out.error = 1;
+	t->out.errorID = errorID;
+	
+	if(errorString) {
+		stringlcpy(t->out.errorString, (UDINT)errorString, sizeof(t->out.errorString));
+	}
+	else {
+		internalGetErrorMsg((char*)&t->out.errorString, errorID, sizeof(t->out.errorString));
+	}
+	
+	return 0;
+
+}
+
+unsigned short internalSetWSStreamError(struct WebSocStream_typ* t, signed long errorID, char* errorString)
+{
+	if( t == 0 ) return WS_ERR_INVALID_INPUT;
+	
+	t->out.error = 1;
+	t->out.errorID = errorID;
+	
+	if(errorString) {
+		stringlcpy(t->out.errorString, errorString, sizeof(t->out.errorString));
+	}
+	else {
+		internalGetErrorMsg((char*)&t->out.errorString, errorID, sizeof(t->out.errorString));
+	}
+	
+	return 0;
+	
+}
+
+unsigned short internalGetErrorMsg(char* errorString, signed long errorID, unsigned long errorStringSize)
+{
+	// No arg checks because this is an internal function
+	switch( errorID ){
+		// It is developers res
+		case WS_ERR_INVALID_INPUT: stringlcpy((UDINT)errorString, (UDINT)&"Invalid FUB inputs.", errorStringSize); break;
+		case WS_ERR_NOT_IMPLEMENTED: stringlcpy((UDINT)errorString, (UDINT)&"Feature not yet implemented.", errorStringSize); break;
+		case WS_ERR_PAYLOAD_LENGTH : stringlcpy((UDINT)errorString, (UDINT)&"Invalid payload length.", errorStringSize); break;
+		case WS_ERR_MEM_ALLOC: stringlcpy((UDINT)errorString, (UDINT)&"Error allocating memory for buffers. Check BufferSize.", errorStringSize); break;
+		case WS_ERR_NO_LICENSE: stringlcpy((UDINT)errorString, (UDINT)&"No license located on TG.", errorStringSize); break;
+		case WS_ERR_KEY_NOT_FOUND: stringlcpy((UDINT)errorString, (UDINT)&"Websocket key not found. Invalid upgrade request.", errorStringSize); break;
+		case WS_ERR_PARTIAL_HTTP_MESSAGE: stringlcpy((UDINT)errorString, (UDINT)&"Partial HTTP message recieved.", errorStringSize); break;
+		case WS_ERR_INVALID_HTTP_MESSAGE: stringlcpy((UDINT)errorString, (UDINT)&"Invalid HTTP message recieved.", errorStringSize); break;
+		case WS_ERR_BUFFER_FULL: stringlcpy((UDINT)errorString, (UDINT)&"Buffer full.", errorStringSize); break;
+		
+		default: stringlcpy((UDINT)errorString, (UDINT)&"Unknown error.", errorStringSize); break;
+		
+	} // switch(ErrorID) //
+	
+	return 0;
+}
+
+plcbit WSInternalLicenseIsOk() {
+
+	// HW - tested, TG required
+	// HW in simulation - tested, no TG required
+	// ARsim - tested, TG REQUIRED!
+	
+	protect.productCode = 227;
+	strcpy(protect.orderNumber, "1TGC.439456.whmi01");
+	strcpy(protect.description, "webHMI communications library to enable HTML/CSS/JS-based interfaces to B&R controllers");
+	protect.reaction = guardLIC_REACT_LOGBOOK;
+	protect.allowSimulation = 1;
+	
+	tgProtect(&protect);
+	
+	return protect.licenseOk;
+	
+}
