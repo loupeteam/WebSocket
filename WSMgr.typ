@@ -11,13 +11,13 @@ TYPE
 	END_STRUCT;
 	WebSocketConnectionInCfg_typ : 	STRUCT 
 		mode : WebSocketMode_enum;
+		localIPAddress : STRING[TCPCOMM_STRLEN_IPADDRESS];
+		localPort : UDINT;
+		remoteIPAddress : STRING[TCPCOMM_STRLEN_IPADDRESS];
+		remotePort : UDINT;
+		sendBufferSize : UDINT;
 		useSSL : BOOL;
 		sslCertificate : UDINT;
-		sendBufferSize : UDINT;
-		remoteIPAddress : STRING[80];
-		remotePort : UDINT;
-		localIPAddress : STRING[80];
-		localPort : UDINT;
 	END_STRUCT;
 	WebSocketConnectionInCmd_typ : 	STRUCT 
 		enable : BOOL;
