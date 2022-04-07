@@ -54,10 +54,12 @@ plcbit wsManageConnection(struct WebSocketConnection_typ* t)
 		|| strcmp(t->internal.tcpConnection.IN.CFG.RemoteIPAddress, t->in.cfg.remoteIPAddress) != 0
 		|| t->internal.tcpConnection.IN.CFG.RemotePort != t->in.cfg.remotePort
 		|| (DINT)t->internal.tcpConnection.IN.CFG.Mode != (DINT)t->in.cfg.mode
-		|| t->internal.tcpConnection.IN.CFG.UseSSL != t->in.cfg.useSSL) {
+		|| t->internal.tcpConnection.IN.CFG.UseSSL != t->in.cfg.useSSL
+		|| t->internal.tcpConnection.IN.CFG.SendBufferSize != t->in.cfg.sendBufferSize) {
 		
 		strcpy(t->internal.tcpConnection.IN.CFG.LocalIPAddress, t->in.cfg.localIPAddress);
 		t->internal.tcpConnection.IN.CFG.LocalPort = t->in.cfg.localPort;
+		t->internal.tcpConnection.IN.CFG.SendBufferSize = t->in.cfg.sendBufferSize == 0 ? WS_DEFAULT_CONNECT_BUF_SIZE : t->in.cfg.sendBufferSize;
 		t->internal.tcpConnection.IN.CFG.UseSSL = t->in.cfg.useSSL;
 		strcpy(t->internal.tcpConnection.IN.CFG.RemoteIPAddress, t->in.cfg.remoteIPAddress);
 		t->internal.tcpConnection.IN.CFG.RemotePort = t->in.cfg.remotePort;
