@@ -36,14 +36,20 @@ void webSocketOnDisconnect(struct WebSocStream_typ* t) {
 	t->internal.connectionState = 0;
 }
 
-void webSocketShiftRecievePointer(struct WebSocStream_typ* t, unsigned long bytes) {
-	t->internal.fub.tcpStream.IN.PAR.pReceiveData += bytes;
-	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength -= bytes;
+void webSocketShiftReceivePointer(struct WebSocStream_typ* t, unsigned long bytes) {
+	if(t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength < bytes) {
+		t->internal.fub.tcpStream.IN.PAR.pReceiveData += t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength;
+		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = 0;
+		
+		internalSetWSStreamError(t, WS_ERR_BUFFER_FULL, 0);
+	}
+	else {
+		t->internal.fub.tcpStream.IN.PAR.pReceiveData += bytes;
+		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength -= bytes;
+	}
 }
-// TODO: Check spellling
-void webSocketResetRecievePointer(struct WebSocStream_typ* t) {
+void webSocketResetReceivePointer(struct WebSocStream_typ* t) {
 	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.recieveBuffer;
-	// TODO: Dont allow rollover
 	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = t->internal.bufferSize;
 }
 
@@ -85,7 +91,7 @@ plcbit wsSend(struct WebSocStream_typ* t)
 	
 	if(!t->internal.initialized) {
 		webSocketStreamInitialize(t); // This fn will set errors directly if they occur
-		if(!t->internal.initialized) return 1; // If we failed to initiallize dont continue as it can cause page faults
+		if(!t->internal.initialized) return 1; // If we failed to initiallize, don't continue as it can cause page faults
 	}
 
 	// Check license
@@ -105,7 +111,7 @@ plcbit wsSend(struct WebSocStream_typ* t)
 		
 		// Handle connect
 		t->internal.connected = 1; 
-		webSocketResetRecievePointer(t);
+		webSocketResetReceivePointer(t);
 		
 		// Copy connection parameters
 		memcpy(&t->internal.connection, &t->in.par.connection.parameters, sizeof(t->internal.connection));
@@ -141,16 +147,15 @@ plcbit wsSend(struct WebSocStream_typ* t)
 			
 				//"Sec-WebSocket-Extensions: x-webkit-deflate-frame\r\n"
 			
-				strcat((char*)t->internal.sendBuffer, "\r\n");
+				strcat((char*)t->internal.sendBuffer, "\r\n"); // End header
 			
-				// TODO: send
 				t->internal.fub.tcpStream.IN.CMD.Send = 1;
 				t->internal.fub.tcpStream.IN.PAR.SendLength = strlen((char*)t->internal.sendBuffer);
 				
 				t->internal.connectionState = 1;
 			}
 			else {
-				// TODO: recieve packet then say we good 
+				// If Recieve a packet, then say we good 
 				if(t->internal.fub.tcpStream.OUT.DataReceived) {
 					t->internal.connectionUpgraded = 1;
 				}
@@ -251,7 +256,7 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 		
 		// Handle connect
 		t->internal.connected = 1; 
-		webSocketResetRecievePointer(t);
+		webSocketResetReceivePointer(t);
 		
 		// Copy connection parameters
 		memcpy(&t->internal.connection, &t->in.par.connection, sizeof(t->internal.connection));
@@ -315,7 +320,7 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 			
 			if(t->internal.fub.wsConnect.status == WS_ERR_PARTIAL_HTTP_MESSAGE) {
 				// Shift the point to append the new data to current message
-				webSocketShiftRecievePointer(t, t->internal.fub.tcpStream.OUT.ReceivedDataLength);
+				webSocketShiftReceivePointer(t, t->internal.fub.tcpStream.OUT.ReceivedDataLength);
 			}
 			else if(t->internal.fub.wsConnect.status != 0) {
 				// TODO: Handle errors
@@ -323,7 +328,7 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 				internalSetWSStreamError(t, t->internal.fub.wsConnect.status, 0);
 			}
 			else {
-				webSocketResetRecievePointer(t);
+				webSocketResetReceivePointer(t);
 				t->internal.fub.tcpStream.IN.PAR.pSendData = t->internal.sendBuffer;
 				t->internal.fub.tcpStream.IN.PAR.SendLength = t->internal.fub.wsConnect.outputMessageLength;
 				t->internal.fub.tcpStream.IN.CMD.Send = 1;
@@ -331,8 +336,6 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 		}
 		else if(t->internal.connection.mode == WS_MODE_CLIENT) {
 			// We are handling connection in send
-			// TODO: If client request upgrade
-			//internalSetWSStreamError(t, WS_ERR_NOT_IMPLEMENTED, 0);
 		}
 	}
 	else if(t->internal.fub.tcpStream.OUT.DataReceived) {
@@ -346,7 +349,7 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 			internalSetWSStreamError(t, t->internal.fub.wsDecode.status, 0);
 			
 			// If we get an error on a packet then dont keey building the frame
-			webSocketResetRecievePointer(t);
+			webSocketResetReceivePointer(t);
 			
 		}
 		else {
@@ -363,7 +366,7 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 			if(!t->internal.fub.wsDecode.partialFrame) {
 			
 				// We recieved a whole frame
-				webSocketResetRecievePointer(t); 
+				webSocketResetReceivePointer(t); 
 			
 //				if(t->internal.fub.wsDecode.mask && t->in.par.pReceiveData) {
 //					t->internal.fub.wsMask.pDest = t->in.par.pReceiveData;
