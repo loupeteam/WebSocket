@@ -67,7 +67,7 @@ plcbit webSocketStreamInitialize(struct WebSocStream_typ* t) {
 			internalSetWSStreamError(t, WS_ERR_MEM_ALLOC, 0);
 		}
 	
-	t->internal.fub.tcpStream.IN.PAR.AllowContinuousReceive = 1;
+	
 	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.recieveBuffer;
 	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = t->internal.bufferSize-1;
 	t->internal.fub.tcpStream.IN.PAR.AllowContinuousSend = 1;
@@ -158,6 +158,9 @@ plcbit wsSend(struct WebSocStream_typ* t)
 				// If Recieve a packet, then say we good 
 				if(t->internal.fub.tcpStream.OUT.DataReceived) {
 					t->internal.connectionUpgraded = 1;
+					if(!t->in.par.allowContinuousReceive) {
+						t->internal.fub.tcpStream.IN.CMD.AcknowledgeData = 1;
+					}
 				}
 			}
 			
@@ -165,7 +168,7 @@ plcbit wsSend(struct WebSocStream_typ* t)
 			//internalSetWSStreamError(t, WS_ERR_NOT_IMPLEMENTED, 0);
 		}
 	}
-	else if(t->in.cmd.send) {
+	else if(t->in.cmd.send && (!t->internal.prevSend || t->in.par.allowContinuousSend)) {
 		// TODO: Make this more configurable 
 		t->internal.fub.wsEncode.fin = 1;
 		t->internal.fub.wsEncode.mask = t->internal.connection.mode == WS_MODE_CLIENT; // Clients require masking
@@ -191,12 +194,14 @@ plcbit wsSend(struct WebSocStream_typ* t)
 			t->internal.fub.tcpStream.IN.PAR.SendLength = t->internal.fub.wsEncode.frameLength;
 		}
 	}
+	t->internal.prevSend = t->in.cmd.send;
 	
 	if(t->in.cmd.close) {
 		t->in.cmd.close = 0;
 		webSocketOnDisconnect(t);
 	}
 	
+	t->internal.fub.tcpStream.IN.PAR.SendFlags = t->in.par.sendFlags;
 	TCPStreamSend(&t->internal.fub.tcpStream);
 	t->internal.fub.tcpStream.IN.CMD.Send = 0;
 	t->internal.fub.tcpStream.IN.CMD.AcknowledgeData = 0;
@@ -269,15 +274,20 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 		webSocketOnDisconnect(t);
 	}
 	
+	t->internal.fub.tcpStream.IN.PAR.AllowContinuousReceive = t->in.par.allowContinuousReceive;
+	t->internal.fub.tcpStream.IN.PAR.ReceiveFlags = t->in.par.receiveFlags;
+	t->internal.fub.tcpStream.IN.CMD.AcknowledgeData |= t->in.cmd.acknowledgeData; // Set acknowledge data from user. It may also be set internally so dont override it
 	TCPStreamReceive(&t->internal.fub.tcpStream);
 	t->internal.fub.tcpStream.IN.CMD.Receive = 0;
 	t->internal.fub.tcpStream.IN.CMD.AcknowledgeData = 0;
 	t->internal.fub.tcpStream.IN.CMD.Close = 0;
 	t->internal.fub.tcpStream.IN.CMD.AcknowledgeError = 0;
 	
-	t->out.dataReceived = 0; // Set output here, it will get overwritten if data is recieved below
-	t->out.receivedDataLength = 0;
-	memset(&t->out.header, 0, sizeof(t->out.header)); // TODO: We actually only want to do this if data is acknowledged
+	if(t->in.par.allowContinuousReceive || t->in.cmd.acknowledgeData) {
+		t->out.dataReceived = 0; // Set output here, it will get overwritten if data is recieved below
+		t->out.receivedDataLength = 0;
+		memset(&t->out.header, 0, sizeof(t->out.header)); 
+	}
 	
 	if(t->internal.fub.tcpStream.OUT.Error) {
 		switch (t->internal.fub.tcpStream.OUT.ErrorID) {
@@ -312,6 +322,9 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 		// Upgrade http(s) connection to a ws(s)
 		// Client request upgrade, Server accepts
 		if(t->internal.connection.mode == WS_MODE_SERVER) {
+			if(!t->in.par.allowContinuousReceive) {
+				t->internal.fub.tcpStream.IN.CMD.AcknowledgeData = 1;
+			}
 
 			t->internal.fub.wsConnect.outputMessageSize = t->internal.bufferSize;
 			t->internal.fub.wsConnect.pInputMessage = t->internal.fub.tcpStream.IN.PAR.pReceiveData;
@@ -347,6 +360,10 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 		
 		if(t->internal.fub.wsDecode.status) {
 			internalSetWSStreamError(t, t->internal.fub.wsDecode.status, 0);
+			
+			if(!t->in.par.allowContinuousReceive) {
+				t->internal.fub.tcpStream.IN.CMD.AcknowledgeData = 1; // Acknowledge data as we have a bad packet
+			}
 			
 			// If we get an error on a packet then dont keey building the frame
 			webSocketResetReceivePointer(t);
@@ -391,7 +408,12 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 				t->out.receivedDataLength = t->internal.fub.wsDecode.payloadLength;
 			}
 			else {
-				webSocketShiftRecievePointer(t, t->internal.fub.tcpStream.OUT.ReceivedDataLength); // Shift recieve pointer so we can append new data
+				if(!t->in.par.allowContinuousReceive) {
+					t->internal.fub.tcpStream.IN.CMD.AcknowledgeData = 1; // Acknowledge data so we can get rest of packet
+				}
+				
+				webSocketShiftReceivePointer(t, t->internal.fub.tcpStream.OUT.ReceivedDataLength); // Shift recieve pointer so we can append new data
+				
 //				t->out.dataReceived = 0;
 //				t->out.receivedDataLength = 0;
 			}

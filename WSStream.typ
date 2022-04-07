@@ -60,6 +60,7 @@ TYPE
 		bufferSize : UDINT;
 		sendBuffer : UDINT;
 		recieveBuffer : UDINT;
+		prevSend : BOOL;
 	END_STRUCT;
 	WebSocStream_Int_Debug_typ : 	STRUCT 
 		New_Member : USINT;
