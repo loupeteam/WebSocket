@@ -59,7 +59,7 @@ plcbit wsManageConnection(struct WSConnectionManager_typ* t)
 		
 		strcpy(t->internal.tcpConnection.IN.CFG.LocalIPAddress, t->in.cfg.localIPAddress);
 		t->internal.tcpConnection.IN.CFG.LocalPort = t->in.cfg.localPort;
-		t->internal.tcpConnection.IN.CFG.SendBufferSize = t->in.cfg.sendBufferSize == 0 ? WS_DEFAULT_CONNECT_BUF_SIZE : t->in.cfg.sendBufferSize;
+		t->internal.tcpConnection.IN.CFG.SendBufferSize = t->in.cfg.sendBufferSize;
 		t->internal.tcpConnection.IN.CFG.UseSSL = t->in.cfg.useSSL;
 		strcpy(t->internal.tcpConnection.IN.CFG.RemoteIPAddress, t->in.cfg.remoteIPAddress);
 		t->internal.tcpConnection.IN.CFG.RemotePort = t->in.cfg.remotePort;
