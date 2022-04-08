@@ -7,6 +7,7 @@ info@loupe.team
 
 # Change log
 
+ - 0.01.0 - Update dependencies 
  - 0.00.2 - Add Client support
  - 0.00.1 - Initial version
 
