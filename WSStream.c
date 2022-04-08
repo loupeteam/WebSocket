@@ -26,7 +26,7 @@
 // Manage WebSocket connection										*
 //*******************************************************************
 
-void webSocketOnDisconnect(struct WebSocStream_typ* t) {
+void webSocketOnDisconnect(struct WSStream_typ* t) {
 	t->internal.fub.tcpStream.IN.CMD.Receive = 0;
 	t->internal.fub.tcpStream.IN.CMD.Send = 0;
 	t->internal.fub.tcpStream.IN.CMD.Close = 1;
@@ -36,7 +36,7 @@ void webSocketOnDisconnect(struct WebSocStream_typ* t) {
 	t->internal.connectionState = 0;
 }
 
-void webSocketShiftReceivePointer(struct WebSocStream_typ* t, unsigned long bytes) {
+void webSocketShiftReceivePointer(struct WSStream_typ* t, unsigned long bytes) {
 	if(t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength < bytes) {
 		t->internal.fub.tcpStream.IN.PAR.pReceiveData += t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength;
 		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = 0;
@@ -48,12 +48,12 @@ void webSocketShiftReceivePointer(struct WebSocStream_typ* t, unsigned long byte
 		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength -= bytes;
 	}
 }
-void webSocketResetReceivePointer(struct WebSocStream_typ* t) {
+void webSocketResetReceivePointer(struct WSStream_typ* t) {
 	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.recieveBuffer;
 	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = t->internal.bufferSize;
 }
 
-plcbit webSocketStreamInitialize(struct WebSocStream_typ* t) {
+plcbit webSocketStreamInitialize(struct WSStream_typ* t) {
 	
 	t->internal.bufferSize = t->in.cfg.bufferSize + WS_HEADER_MAX_LEN;
 	
@@ -78,7 +78,7 @@ plcbit webSocketStreamInitialize(struct WebSocStream_typ* t) {
 	return t->internal.initialized;
 }
 
-plcbit wsSend(struct WebSocStream_typ* t)
+plcbit wsSend(struct WSStream_typ* t)
 {
 	if(!t) return 1;
 	
@@ -219,7 +219,7 @@ plcbit wsSend(struct WebSocStream_typ* t)
 	
 }
 
-plcbit wsReceive(struct WebSocStream_typ* t)
+plcbit wsReceive(struct WSStream_typ* t)
 {
 	if(!t) return 1;
 	
@@ -371,7 +371,7 @@ plcbit wsReceive(struct WebSocStream_typ* t)
 		}
 		else {
 		
-			t->out.partialDataRecieved = t->internal.fub.wsDecode.partialFrame || t->internal.fub.wsDecode.partialHeader;
+			t->out.partialDataReceived = t->internal.fub.wsDecode.partialFrame || t->internal.fub.wsDecode.partialHeader;
 			t->out.header.fin = t->internal.fub.wsDecode.fin;
 			t->out.header.mask = t->internal.fub.wsDecode.mask;
 			t->out.header.rsv = t->internal.fub.wsDecode.rsv;

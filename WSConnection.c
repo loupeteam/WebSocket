@@ -23,7 +23,7 @@
 // Manage WebSocket connection										*
 //*******************************************************************
 
-plcbit wsManageConnection(struct WebSocketConnection_typ* t)
+plcbit wsManageConnection(struct WSConnectionManager_typ* t)
 {
 
 	if (t == 0) return 1;

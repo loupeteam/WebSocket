@@ -2,19 +2,19 @@
 
 FUNCTION wsManageConnection : BOOL
 	VAR_INPUT
-		inst : WebSocketConnection_typ;
+		inst : WSConnectionManager_typ;
 	END_VAR
 END_FUNCTION
 
 FUNCTION wsSend : BOOL
 	VAR_INPUT
-		inst : WebSocStream_typ;
+		inst : WSStream_typ;
 	END_VAR
 END_FUNCTION
 
 FUNCTION wsReceive : BOOL
 	VAR_INPUT
-		inst : WebSocStream_typ;
+		inst : WSStream_typ;
 	END_VAR
 END_FUNCTION
 (*Utility Fns*)

@@ -1,6 +1,6 @@
 
 TYPE
-	WebSocHeader_typ : 	STRUCT 
+	WSHeader_typ : 	STRUCT 
 		fin : BOOL;
 		rsv : USINT;
 		opCode : USINT;
@@ -8,7 +8,7 @@ TYPE
 		maskingKey : ARRAY[0..3]OF USINT;
 		frameLength : UDINT;
 	END_STRUCT;
-	WebSocketOpCode_enum : 
+	WS_OpCode_enum : 
 		(
 		WS_OPCODE_CONTINUATION := 0,
 		WS_OPCODE_TEXT := 1,
@@ -19,7 +19,7 @@ TYPE
 		WS_OPCODE_PONG := 10,
 		WS_OPCODE_RESERVED_CONTROL := 11
 		);
-	WebSocketERR_enum : 
+	WS_ERR_enum : 
 		(
 		WS_ERR_OK,
 		WS_ERR_INVALID_INPUT := 5500,
@@ -27,13 +27,13 @@ TYPE
 		WS_ERR_PAYLOAD_LENGTH,
 		WS_ERR_MEM_ALLOC,
 		WS_ERR_NO_LICENSE,
-		WS_ERR_KEY_NOT_FOUND,
+		WS_ERR_KEY_NOT_FOUND, (*5505*)
 		WS_ERR_PARTIAL_HTTP_MESSAGE,
 		WS_ERR_INVALID_HTTP_MESSAGE,
 		WS_ERR_BUFFER_FULL,
-		WS_ERR_
+		WS_ERR_ (*5509*)
 		);
-	WebSocketMode_enum : 
+	WS_Mode_enum : 
 		(
 		WS_MODE_SERVER := 50000,
 		WS_MODE_CLIENT
