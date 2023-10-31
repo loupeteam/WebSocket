@@ -33,9 +33,6 @@ unsigned short internalGetErrorMsg(char* errorString, signed long errorID, unsig
 // Skip whitespace
 char *skip(char *in);
 
-// Check for license is valid
-plcbit WSInternalLicenseIsOk();
-
 #ifdef __cplusplus
 	};
 #endif

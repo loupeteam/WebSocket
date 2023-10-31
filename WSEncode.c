@@ -55,15 +55,6 @@ void wsEncode(struct wsEncode* t)
 		t->status = WS_ERR_INVALID_INPUT;
 		return;
 	}
-	
-	// Check license
-	//---------------
-
-	// Do not allow anything for now
-	if (!WSInternalLicenseIsOk()) {
-		t->status = WS_ERR_NO_LICENSE;
-		return;
-	}
 
 	// Get local copy of pFrame
 	USINT *pFrame = (USINT*)t->pFrame;

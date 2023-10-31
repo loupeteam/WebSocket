@@ -34,16 +34,6 @@ void wsConnect(struct wsConnect* t)
 		return;
 	}
 	
-	
-	// Check license
-	//---------------
-
-	// Do not allow anything for now
-	if (!WSInternalLicenseIsOk()) {
-		t->status = WS_ERR_NO_LICENSE;
-		return;
-	}
-	
 	// Internal variables
 	char *pKey;
 	UDINT msgLen = strlen(t->pInputMessage);

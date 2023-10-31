@@ -35,15 +35,6 @@ plcbit wsManageConnection(struct WSConnectionManager_typ* t)
 		t->in.cmd.acknowledgeError = 0;
 	}
 	
-	// Check license
-	//---------------
-
-	// Do not allow anything for now
-	if (!WSInternalLicenseIsOk()) {
-		internalSetWSConnectionError(t, WS_ERR_NO_LICENSE, 0);
-		return 1;
-	}
-	
 	// Map inputs to internal FUB
 	t->internal.tcpConnection.IN.CMD.Enable = t->in.cmd.enable;
 	t->internal.tcpConnection.IN.CMD.AcknowledgeConnection = t->in.cmd.acknowledgeConnection;

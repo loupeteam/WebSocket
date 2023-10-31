@@ -25,6 +25,5 @@
     <Dependency ObjectName="StringExt" FromVersion="0.14.0" ToVersion="0.14.9" />
     <Dependency ObjectName="AsHttp" />
     <Dependency ObjectName="sys_lib" />
-    <Dependency ObjectName="BodyGuard" FromVersion="0.03.0" ToVersion="0.03.9" />
   </Dependencies>
 </Library>

@@ -93,15 +93,6 @@ plcbit wsSend(struct WSStream_typ* t)
 		webSocketStreamInitialize(t); // This fn will set errors directly if they occur
 		if(!t->internal.initialized) return 1; // If we failed to initiallize, don't continue as it can cause page faults
 	}
-
-	// Check license
-	//---------------
-
-	// Do not allow anything for now
-	if (!WSInternalLicenseIsOk()) {
-		internalSetWSStreamError(t, WS_ERR_NO_LICENSE, 0);
-		return 1;
-	}
 	
 	if(memcmp(&t->internal.connection, &t->in.par.connection, sizeof(t->internal.connection)) != 0) {
 		if(t->internal.connected) {
@@ -233,15 +224,6 @@ plcbit wsReceive(struct WSStream_typ* t)
 	if(!t->internal.initialized) {
 		webSocketStreamInitialize(t); // This fn will set errors directly if they occur
 		if(!t->internal.initialized) return 1; // If we failed to initiallize dont continue as it can cause page faults
-	}
-	
-	// Check license
-	//---------------
-
-	// Do not allow anything for now
-	if (!WSInternalLicenseIsOk()) {
-		internalSetWSStreamError(t, WS_ERR_NO_LICENSE, 0);
-		return 1;
 	}
 
 	if(!t->internal.connected) {

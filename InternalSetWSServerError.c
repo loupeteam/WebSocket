@@ -24,8 +24,6 @@
 	};
 #endif
 
-static struct tgProtect protect = {0};
-
 /************************************************************************/
 /* Internal: Set error status on a jsonWebSocketServer FUB instance 	*/
 /************************************************************************/
@@ -89,22 +87,4 @@ unsigned short internalGetErrorMsg(char* errorString, signed long errorID, unsig
 	} // switch(ErrorID) //
 	
 	return 0;
-}
-
-plcbit WSInternalLicenseIsOk() {
-
-	// HW - tested, TG required
-	// HW in simulation - tested, no TG required
-	// ARsim - tested, TG REQUIRED!
-	
-	protect.productCode = 227;
-	strcpy(protect.orderNumber, "1TGC.439456.whmi01");
-	strcpy(protect.description, "webHMI communications library to enable HTML/CSS/JS-based interfaces to B&R controllers");
-	protect.reaction = guardLIC_REACT_LOGBOOK;
-	protect.allowSimulation = 1;
-	
-	tgProtect(&protect);
-	
-	return protect.licenseOk;
-	
 }
