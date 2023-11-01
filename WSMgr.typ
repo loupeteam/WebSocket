@@ -1,4 +1,10 @@
-
+(*
+ * File: WSMgr.typ
+ * Copyright (c) 2023 Loupe
+ * https://loupe.team
+ * 
+ * This file is part of WebSocket, licensed under the MIT License.
+ *)
 TYPE
 	WSConnectionManager_typ : 	STRUCT 
 		in : WSConnectionManager_In_typ;

@@ -1,5 +1,12 @@
-(*For each client lets instantiate an interface*)
+(*
+ * File: WSStream.typ
+ * Copyright (c) 2023 Loupe
+ * https://loupe.team
+ * 
+ * This file is part of WebSocket, licensed under the MIT License.
+ *)
 
+(*For each client lets instantiate an interface*)
 TYPE
 	WSStream_typ : 	STRUCT 
 		in : WSStream_IN_typ;

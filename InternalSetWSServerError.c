@@ -1,13 +1,10 @@
-/********************************************************************
- * COPYRIGHT --  
- ********************************************************************
- * Library: OMJSON
- * File: jsonInternalSetServerError.c
- * Author: davidblackburn
- * Created: September 22, 2014
- ********************************************************************
- * Implementation of library OMJSON
- ********************************************************************/
+/*
+ * File: InternalSetWSServerError.c
+ * Copyright (c) 2023 Loupe
+ * https://loupe.team
+ * 
+ * This file is part of WebSocket, licensed under the MIT License.
+ */
 
 #include <bur/plctypes.h>
 #ifdef __cplusplus

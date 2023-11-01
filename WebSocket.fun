@@ -1,4 +1,10 @@
-(*Main Fns*)
+(*
+ * File: WebSocket.fun
+ * Copyright (c) 2023 Loupe
+ * https://loupe.team
+ * 
+ * This file is part of WebSocket, licensed under the MIT License.
+ *)
 
 FUNCTION wsManageConnection : BOOL
 	VAR_INPUT

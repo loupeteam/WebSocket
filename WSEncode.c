@@ -1,8 +1,10 @@
-//*********************************************************************************
-// Copyright:  
-// Author:    dfblackburn
-// Created:   December 04, 2015
-//********************************************************************************
+/*
+ * File: WSEncode.c
+ * Copyright (c) 2023 Loupe
+ * https://loupe.team
+ * 
+ * This file is part of WebSocket, licensed under the MIT License.
+ */
 
 #include <bur/plctypes.h>
 #ifdef __cplusplus

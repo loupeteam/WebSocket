@@ -1,8 +1,10 @@
-//*********************************************************************************
-// Copyright:  
-// Author:    dfblackburn
-// Created:   December 03, 2015
-//********************************************************************************
+/*
+ * File: WSConnect.c
+ * Copyright (c) 2023 Loupe
+ * https://loupe.team
+ * 
+ * This file is part of WebSocket, licensed under the MIT License.
+ */
 
 #include <bur/plctypes.h>
 #ifdef __cplusplus
