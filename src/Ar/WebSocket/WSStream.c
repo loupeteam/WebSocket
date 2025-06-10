@@ -353,6 +353,11 @@ plcbit wsReceive(struct WSStream_typ* t)
 			webSocketResetReceivePointer(t);
 			
 		}
+		else if(t->internal.fub.wsDecode.opCode == WS_OPCODE_CONNECTION_CLOSE) {
+			// Lets close gracefully
+			webSocketOnDisconnect(t);
+			webSocketResetReceivePointer(t);
+		}
 		else {
 		
 			t->out.partialDataReceived = t->internal.fub.wsDecode.partialFrame || t->internal.fub.wsDecode.partialHeader;
