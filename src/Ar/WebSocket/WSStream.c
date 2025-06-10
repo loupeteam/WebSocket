@@ -44,15 +44,20 @@ void webSocketShiftReceivePointer(struct WSStream_typ* t, unsigned long bytes) {
 		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = 0;
 		
 		internalSetWSStreamError(t, WS_ERR_BUFFER_FULL, 0);
+		t->internal.debug.recieveBufferShiftFull++;
 	}
 	else {
 		t->internal.fub.tcpStream.IN.PAR.pReceiveData += bytes;
 		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength -= bytes;
 	}
+	t->internal.debug.recieveBufferShift++;
+	t->internal.debug.recieveBufferIsShifted = 1;
 }
 void webSocketResetReceivePointer(struct WSStream_typ* t) {
 	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.recieveBuffer;
 	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = t->internal.bufferSize;
+	t->internal.debug.recieveBufferReset++;
+	t->internal.debug.recieveBufferIsShifted = 0;
 }
 
 plcbit webSocketStreamInitialize(struct WSStream_typ* t) {
@@ -321,14 +326,15 @@ plcbit wsReceive(struct WSStream_typ* t)
 			}
 			else if(t->internal.fub.wsConnect.status != 0) {
 				// TODO: Handle errors
-				// TODO: Handle partial packets
 				internalSetWSStreamError(t, t->internal.fub.wsConnect.status, 0);
+				webSocketResetReceivePointer(t);
 			}
 			else {
 				webSocketResetReceivePointer(t);
 				t->internal.fub.tcpStream.IN.PAR.pSendData = t->internal.sendBuffer;
 				t->internal.fub.tcpStream.IN.PAR.SendLength = t->internal.fub.wsConnect.outputMessageLength;
 				t->internal.fub.tcpStream.IN.CMD.Send = 1;
+				//t->internal.connectionUpgraded = 1; // Lets try to set this here even though we have not sent the message yet
 			}
 		}
 		else if(t->internal.connection.mode == WS_MODE_CLIENT) {
@@ -359,6 +365,10 @@ plcbit wsReceive(struct WSStream_typ* t)
 			webSocketResetReceivePointer(t);
 		}
 		else {
+			
+			if(t->internal.fub.wsDecode.decodeLength < t->internal.fub.tcpStream.OUT.ReceivedDataLength) {
+				t->internal.debug.websocketPacketTooBig++;
+			}
 		
 			t->out.partialDataReceived = t->internal.fub.wsDecode.partialFrame || t->internal.fub.wsDecode.partialHeader;
 			t->out.header.fin = t->internal.fub.wsDecode.fin;
@@ -386,24 +396,24 @@ plcbit wsReceive(struct WSStream_typ* t)
 				// We recieved a whole frame
 				webSocketResetReceivePointer(t); 
 			
-//				if(t->internal.fub.wsDecode.mask && t->in.par.pReceiveData) {
-//					t->internal.fub.wsMask.pDest = t->in.par.pReceiveData;
-//					t->internal.fub.wsMask.destSize = t->in.par.maxReceiveLength;
-//					t->internal.fub.wsMask.pSrc = t->internal.fub.wsDecode.pPayloadData;
-//					t->internal.fub.wsMask.srcLength = t->internal.fub.wsDecode.payloadLength;
-//					
-//					memcpy(t->internal.fub.wsMask.maskingKey, t->internal.fub.wsDecode.maskingKey, sizeof(t->internal.fub.wsMask.maskingKey));
-//					
-//					WSMask(&t->internal.fub.wsMask);
-//					
-//					if(t->internal.fub.wsMask.status != 0) {
-//						internalSetWSStreamError(t, t->internal.fub.wsMask.status, 0);	
-//					}
-//				}
-//				else if(t->in.par.pReceiveData) {
-//					// TODO: Handle pRecieveData not being large enough
-//					memcpy((void*)t->in.par.pReceiveData, (void*)t->internal.fub.wsDecode.pPayloadData, t->internal.fub.wsDecode.payloadLength);
-//				}
+				//				if(t->internal.fub.wsDecode.mask && t->in.par.pReceiveData) {
+				//					t->internal.fub.wsMask.pDest = t->in.par.pReceiveData;
+				//					t->internal.fub.wsMask.destSize = t->in.par.maxReceiveLength;
+				//					t->internal.fub.wsMask.pSrc = t->internal.fub.wsDecode.pPayloadData;
+				//					t->internal.fub.wsMask.srcLength = t->internal.fub.wsDecode.payloadLength;
+				//					
+				//					memcpy(t->internal.fub.wsMask.maskingKey, t->internal.fub.wsDecode.maskingKey, sizeof(t->internal.fub.wsMask.maskingKey));
+				//					
+				//					WSMask(&t->internal.fub.wsMask);
+				//					
+				//					if(t->internal.fub.wsMask.status != 0) {
+				//						internalSetWSStreamError(t, t->internal.fub.wsMask.status, 0);	
+				//					}
+				//				}
+				//				else if(t->in.par.pReceiveData) {
+				//					// TODO: Handle pRecieveData not being large enough
+				//					memcpy((void*)t->in.par.pReceiveData, (void*)t->internal.fub.wsDecode.pPayloadData, t->internal.fub.wsDecode.payloadLength);
+				//				}
 			
 				t->out.dataReceived = 1;
 				t->out.receivedDataLength = t->internal.fub.wsDecode.payloadLength;
@@ -415,8 +425,8 @@ plcbit wsReceive(struct WSStream_typ* t)
 				
 				webSocketShiftReceivePointer(t, t->internal.fub.tcpStream.OUT.ReceivedDataLength); // Shift recieve pointer so we can append new data
 				
-//				t->out.dataReceived = 0;
-//				t->out.receivedDataLength = 0;
+				//				t->out.dataReceived = 0;
+				//				t->out.receivedDataLength = 0;
 			}
 		}
 	}
