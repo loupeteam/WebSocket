@@ -371,6 +371,18 @@ plcbit wsReceive(struct WSStream_typ* t)
 			
 			if(!t->internal.fub.wsDecode.partialFrame) {
 			
+				if(t->internal.fub.wsDecode.decodeLength < t->internal.fub.tcpStream.OUT.ReceivedDataLength) {
+					// TODO: We should handle multiple packets better
+					// If we got another packet. Lets see if its a close message
+					USINT *pFrame = (USINT*)t->internal.fub.tcpStream.IN.PAR.pReceiveData + t->internal.fub.wsDecode.decodeLength;
+					USINT opCode = (*pFrame & 0x0f);
+					if(opCode == WS_OPCODE_CONNECTION_CLOSE) {
+						// Lets close gracefully
+						webSocketOnDisconnect(t);
+						webSocketResetReceivePointer(t);
+					}
+				}
+				
 				// We recieved a whole frame
 				webSocketResetReceivePointer(t); 
 			
