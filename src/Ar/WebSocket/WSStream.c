@@ -362,7 +362,6 @@ plcbit wsReceive(struct WSStream_typ* t)
 		else if(t->internal.fub.wsDecode.opCode == WS_OPCODE_CONNECTION_CLOSE) {
 			// Lets close gracefully
 			webSocketOnDisconnect(t);
-			webSocketResetReceivePointer(t);
 		}
 		else {
 			
@@ -389,7 +388,6 @@ plcbit wsReceive(struct WSStream_typ* t)
 					if(opCode == WS_OPCODE_CONNECTION_CLOSE) {
 						// Lets close gracefully
 						webSocketOnDisconnect(t);
-						webSocketResetReceivePointer(t);
 					}
 				}
 				
