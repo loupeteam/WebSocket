@@ -44,28 +44,28 @@ void webSocketShiftReceivePointer(struct WSStream_typ* t, unsigned long bytes) {
 		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = 0;
 		
 		internalSetWSStreamError(t, WS_ERR_BUFFER_FULL, 0);
-		t->internal.debug.recieveBufferShiftFull++;
+		t->internal.debug.receiveBufferShiftFull++;
 	}
 	else {
 		t->internal.fub.tcpStream.IN.PAR.pReceiveData += bytes;
 		t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength -= bytes;
 	}
-	t->internal.debug.recieveBufferShift++;
-	t->internal.debug.recieveBufferIsShifted = 1;
+	t->internal.debug.receiveBufferShift++;
+	t->internal.debug.receiveBufferIsShifted = 1;
 }
 void webSocketResetReceivePointer(struct WSStream_typ* t) {
-	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.recieveBuffer;
+	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.receiveBuffer;
 	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = t->internal.bufferSize;
-	t->internal.debug.recieveBufferReset++;
-	t->internal.debug.recieveBufferIsShifted = 0;
+	t->internal.debug.receiveBufferReset++;
+	t->internal.debug.receiveBufferIsShifted = 0;
 }
 
 plcbit webSocketStreamInitialize(struct WSStream_typ* t) {
 	
 	t->internal.bufferSize = t->in.cfg.bufferSize + WS_HEADER_MAX_LEN;
 	
-	if(t->internal.recieveBuffer == 0)
-		if(TMP_alloc(t->internal.bufferSize, (void**)&t->internal.recieveBuffer) != 0) {
+	if(t->internal.receiveBuffer == 0)
+		if(TMP_alloc(t->internal.bufferSize, (void**)&t->internal.receiveBuffer) != 0) {
 			internalSetWSStreamError(t, WS_ERR_MEM_ALLOC, 0);
 		}
 	
@@ -75,12 +75,12 @@ plcbit webSocketStreamInitialize(struct WSStream_typ* t) {
 		}
 	
 	
-	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.recieveBuffer;
+	t->internal.fub.tcpStream.IN.PAR.pReceiveData = t->internal.receiveBuffer;
 	t->internal.fub.tcpStream.IN.PAR.MaxReceiveLength = t->internal.bufferSize-1;
 	t->internal.fub.tcpStream.IN.PAR.AllowContinuousSend = 1;
 	t->internal.fub.tcpStream.IN.PAR.pSendData = t->internal.sendBuffer;
 	
-	t->internal.initialized = (t->internal.recieveBuffer) && (t->internal.sendBuffer);
+	t->internal.initialized = (t->internal.receiveBuffer) && (t->internal.sendBuffer);
 	
 	return t->internal.initialized;
 }

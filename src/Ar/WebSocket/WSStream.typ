@@ -66,15 +66,15 @@ TYPE
 		connectionState : UINT;
 		bufferSize : UDINT;
 		sendBuffer : UDINT;
-		recieveBuffer : UDINT;
+		receiveBuffer : UDINT;
 		prevSend : BOOL;
 	END_STRUCT;
 	WSStream_Int_Debug_typ : 	STRUCT 
 		websocketPacketTooBig : UDINT;
-		recieveBufferShiftFull : UDINT;
-		recieveBufferReset : UDINT;
-		recieveBufferShift : UDINT;
-		recieveBufferIsShifted : BOOL;
+		receiveBufferShiftFull : UDINT;
+		receiveBufferReset : UDINT;
+		receiveBufferShift : UDINT;
+		receiveBufferIsShifted : BOOL;
 	END_STRUCT;
 	WSStream_Int_FUB_typ : 	STRUCT 
 		tcpStream : TCPStream_typ;
