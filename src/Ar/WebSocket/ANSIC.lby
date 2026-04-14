@@ -19,6 +19,7 @@
     <File>sha1.c</File>
     <File>internal.h</File>
     <File Description="Internal: Set error status on a jsonWebSocketServer FUB instance">internalSetWSServerError.c</File>
+    <File>heap.cpp</File>
   </Files>
   <Dependencies>
     <Dependency ObjectName="TCPComm" FromVersion="0.10.0" ToVersion="0.10.9" />
