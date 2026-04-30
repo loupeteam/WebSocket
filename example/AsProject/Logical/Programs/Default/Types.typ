@@ -1,4 +1,3 @@
-
 TYPE
 
 END_TYPE
